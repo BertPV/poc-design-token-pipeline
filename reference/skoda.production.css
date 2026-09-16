@@ -1,0 +1,153 @@
+/* TOKENS IN PRODUCTION FOR SKODA 10/09/2026 — baseline used by `npm run compare` */
+:root {
+    --color-primary-500: #1A392F;
+    --color-primary-400: #476058;
+    --color-primary-300: #748680;
+    --color-primary-200: #A0ADA9;
+    --color-primary-100: #CDD3D1;
+    --color-primary-050: #FFFFFF;
+
+    --color-secondary-500: #2E6746;
+    --color-secondary-400: #419468;
+    --color-secondary-300: #5BC28B;
+    --color-secondary-200: #77D9A4;
+    --color-secondary-100: #78FAAE;
+
+    --color-neutral-white: #FFFFFF;
+    --color-neutral-100: #F1F1F1;
+    --color-neutral-200: #E4E4E4;
+    --color-neutral-300: #CBCECF;
+    --color-neutral-400: #A1A7A8;
+    --color-neutral-500: #6F7677;
+    --color-neutral-600: #464748;
+    --color-neutral-black: #161718;
+
+    --color-success-500: #05500F;
+    --color-success-400: #37D002;
+    --color-success-300: #77BA61;
+    --color-success-200: #C8E8BD;
+    --color-success-100: #E7F6E9;
+    --color-error-500: #911610;
+    --color-error-400: #CE332A;
+    --color-error-300: #EE9E9A;
+    --color-error-200: #F3BEBC;
+    --color-error-100: #F7E6E6;
+
+    --color-warning-500: #803605;
+    --color-warning-400: #EC6513;
+    --color-warning-300: #F18F4E;
+    --color-warning-200: #F3D9C8;
+    --color-warning-100: #FCEADE;
+
+    --type-link-color: var(--color-primary-500);
+    --type-link-hover-color: var(--color-primary-400);
+    --type-heading-color: var(--color-neutral-black);
+    --type-body-color: var(--color-neutral-black);
+    --type-label-color: var(--color-neutral-600);
+
+    --color-info-500: #023266;
+    --color-info-400: #2D71D7;
+    --color-info-300: #5198E4;
+    --color-info-200: #CDE0F4;
+    --color-info-100: #E1EEFD;
+    --border-radius-small: 4px;
+    --border-radius-base: 8px;
+    --border-radius-large: 24px;
+    --border-line-color: var(--color-neutral-200);
+
+    --icon-fill-color: var(--color-neutral-600);
+    --icon-badge-background-color: var(--color-secondary-100);
+    --icon-badge-color: var(--color-primary-500);
+
+    --button-border-width: 2px;
+    --button-border-radius: 24px;
+    --button-padding-horizontal: 20px;
+    --button-padding-horizontal-small: 16px;
+    --button-primary-background-color: var(--color-secondary-100);
+    --button-primary-background-hover-color: var(--color-secondary-200);
+    --button-primary-border-color: var(--color-secondary-100);
+    --button-primary-border-hover-color: var(--color-secondary-200);
+    --button-primary-color: var(--color-neutral-black);
+    --button-primary-color-hover: var(--color-neutral-black);
+    --button-secondary-background-color: #FFFFFF;
+    --button-secondary-background-hover-color: var(--color-neutral-100);
+    --button-secondary-color: var(--color-neutral-600);
+    --button-secondary-border-color: var(--color-neutral-600);
+    --button-secondary-color-hover: var(--color-neutral-600);
+    --button-secondary-border-hover-color: var(--color-neutral-600);
+    --button-disabled-background-color: var(--color-neutral-200);
+    --button-disabled-border-color: var(--color-neutral-200);
+    --button-disabled-color: var(--color-neutral-600);
+    --button-dark-secondary-color: var(--color-neutral-200);
+    --button-dark-secondary-border-color: var(--color-neutral-200);
+    --button-dark-secondary-border-color-hover: var(--color-neutral-white);
+    --button-dark-secondary-color-hover: var(--color-neutral-white);
+    --button-link-color: var(--color-neutral-black);
+    --button-link-hover-color: var(--color-neutral-600);
+    --button-dark-primary-color: var(--color-neutral-black);
+    --button-dark-primary-background-color: var(--color-secondary-100);
+    --button-dark-primary-hover-color: var(--color-neutral-black);
+    --button-dark-primary-background-hover-color: var(--color-secondary-200);
+    --button-dark-primary-border-color: var(--color-secondary-100);
+    --button-dark-primary-border-hover-color: var(--color-secondary-200);
+
+    --input-checked-background-color: var(--color-secondary-400);
+    --input-checked-border-color: var(--color-secondary-400);
+    --input-checked-icon-color: var(--color-neutral-white);
+    --theme: "Skoda";
+    --input-checkbox-background-color: var(--color-neutral-white);
+    --input-checkbox-border-color: var(--color-neutral-400);
+    --input-checkbox-border-width: 1px;
+
+    --stepper-active-color: var(--color-primary-500);
+    --stepper-checked-background-color: var(--color-secondary-100);
+    --stepper-checked-color: var(--color-primary-500);
+    --stepper-active-dark-color: var(--color-secondary-100);
+    --stepper-checked-dark-background-color: var(--color-secondary-100);
+    --stepper-checked-dark-color: var(--color-primary-500);
+
+    --tabs-item-active-background-color: var(--color-primary-500);
+    --tabs-item-active-label-color: var(--color-secondary-100);
+    --tabs-item-label-color: var(--type-body-color);
+    --tabs-background-color: var(--color-neutral-white);
+    --tabs-border-color: var(--border-line-color);
+    --tabs-border-width: 2px;
+    --tabs-border-radius: var(--border-radius-large);
+    --tabs-item-border-radius: var(--border-radius-large);
+
+    --progress-bar-color: var(--color-secondary-400);
+
+    --alert-success-color: var(--color-success-500);
+    --alert-success-border-color: var(--color-success-200);
+    --alert-success-background-color: var(--color-success-200);
+    --alert-info-color: var(--color-info-500);
+    --alert-info-border-color: var(--color-info-200);
+    --alert-info-background-color: var(--color-info-200);
+    --alert-warning-color: var(--color-warning-500);
+    --alert-warning-border-color: var(--color-warning-200);
+    --alert-warning-background-color: var(--color-warning-200);
+    --alert-error-color: var(--color-error-500);
+    --alert-error-border-color: var(--color-error-100);
+    --alert-error-background-color: var(--color-error-100);
+    --alert-neutral-color: var(--color-neutral-600);
+    --alert-neutral-border-color: var(--color-neutral-200);
+    --alert-neutral-background-color: var(--color-neutral-200);
+
+    --tooltip-background-color: var(--color-neutral-600);
+    --tooltip-color: var(--color-neutral-white);
+
+    --body-background-color: var(--color-neutral-100);
+
+    --footer-background-color: var(--color-primary-500);
+    --footer-color: var(--color-neutral-white);
+    --footer-link-color: var(--color-neutral-white);
+    --footer-link-hover-color: var(--color-neutral-200);
+    --headernav-active-border-color: var(--color-secondary-400);
+    --headernav-nav-dropdown-text: var(--color-primary-500);
+    --headernav-nav-dropdown-background-hover: var(--color-primary-100);
+
+    /*-- fonts --*/
+    --type-heading-font-family: "SKODA Next";
+    --type-heading-font-weight: 700;
+    --type-base-font-family: "SKODA Next";
+}

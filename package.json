@@ -1,0 +1,24 @@
+{
+  "name": "@owner/skoda-tokens",
+  "version": "0.0.0",
+  "description": "Design tokens generated from Figma variables with Style Dictionary",
+  "type": "module",
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    "./css/*": "./dist/css/*",
+    "./liferay/*": "./dist/liferay/*"
+  },
+  "scripts": {
+    "build": "node build.mjs",
+    "test": "node --test test/*.test.mjs",
+    "compare": "node scripts/compare.mjs"
+  },
+  "devDependencies": {
+    "style-dictionary": "^5.5.3"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  }
+}

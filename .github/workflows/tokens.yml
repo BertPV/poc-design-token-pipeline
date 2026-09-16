@@ -1,0 +1,90 @@
+name: Build & publish tokens
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'tokens/**'
+      - 'config/**'
+      - 'build.mjs'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/tokens.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write # create the GitHub Release
+  packages: write # publish to GitHub Packages
+
+concurrency:
+  group: tokens
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          registry-url: https://npm.pkg.github.com
+
+      - name: Install
+        run: npm ci
+
+      - name: Build tokens with Style Dictionary
+        run: npm run build
+
+      - name: Test output
+        run: npm test
+
+      - name: Compare with production baseline (informational)
+        run: npm run compare
+
+      - name: Set package name and version
+        id: version
+        run: |
+          OWNER="$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')"
+          VERSION="1.0.${{ github.run_number }}"
+          npm pkg set name="@${OWNER}/skoda-tokens"
+          npm pkg set repository.url="git+https://github.com/${{ github.repository }}.git"
+          npm version "$VERSION" --no-git-tag-version
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "package=@${OWNER}/skoda-tokens" >> "$GITHUB_OUTPUT"
+
+      - name: Publish to GitHub Packages
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Collect release files
+        run: |
+          mkdir -p release
+          cp dist/css/*.css release/
+          for dir in dist/liferay/*/; do
+            mode="$(basename "$dir")"
+            cp "$dir/frontend-token-definition.json" "release/${mode}.frontend-token-definition.json"
+          done
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.version.outputs.version }}
+          name: Tokens v${{ steps.version.outputs.version }}
+          body: |
+            Tokens built from Figma by commit ${{ github.sha }} (${{ github.event.head_commit.message || 'manual run' }}).
+
+            **npm:** `npm install ${{ steps.version.outputs.package }}@${{ steps.version.outputs.version }}`
+            **Direct download (always latest):** `https://github.com/${{ github.repository }}/releases/latest/download/skoda.css`
+
+            See the workflow run summary for the comparison with the production baseline.
+          files: release/*
+
+      - name: Upload build output
+        uses: actions/upload-artifact@v4
+        with:
+          name: tokens-${{ steps.version.outputs.version }}
+          path: dist/
