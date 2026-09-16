@@ -1,15 +1,15 @@
 /**
- * Output platforms. Every mode (tokens/<Mode>.tokens.json) is built with each platform below.
+ * Output platforms. Every brand (tokens/<Brand>.tokens.json) is built with each platform below.
  * To add an output (SCSS, JS, iOS, ...), add a platform here.
  */
-export function platformsFor(mode) {
+export function platformsFor(brand, outDir = 'dist') {
   return {
     css: {
       transformGroup: 'figma/css',
-      buildPath: 'dist/css/',
+      buildPath: `${outDir}/css/`,
       files: [
         {
-          destination: `${mode}.css`,
+          destination: `${brand}.css`,
           format: 'css/variables',
           options: { outputReferences: true, selector: ':root' },
         },
@@ -17,7 +17,7 @@ export function platformsFor(mode) {
     },
     liferay: {
       transformGroup: 'figma/css',
-      buildPath: `dist/liferay/${mode}/`,
+      buildPath: `${outDir}/liferay/${brand}/`,
       files: [
         {
           destination: 'frontend-token-definition.json',

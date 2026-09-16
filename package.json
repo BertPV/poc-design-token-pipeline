@@ -1,7 +1,7 @@
 {
-  "name": "@owner/skoda-tokens",
+  "name": "@owner/design-tokens",
   "version": "0.0.0",
-  "description": "Design tokens generated from Figma variables with Style Dictionary",
+  "description": "Multi-brand design tokens generated from Figma variables with Style Dictionary",
   "type": "module",
   "files": [
     "dist"

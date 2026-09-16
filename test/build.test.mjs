@@ -1,76 +1,96 @@
 /**
- * Regression checks for the generated output. Run `npm run build` first (CI does).
+ * 1. Conversion rules, checked against a fixed fixture (so real Figma changes never break tests).
+ * 2. Structural checks on every real brand in dist/ (run `npm run build` first; CI does).
  */
-import { test } from 'node:test';
+import { test, describe, before } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFile, mkdtemp, writeFile, readdir } from 'node:fs/promises';
+import { readFile, readdir, mkdtemp, writeFile, access } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import StyleDictionary from 'style-dictionary';
-import { registerTransforms } from '../config/transforms.mjs';
+import { buildBrand, brandFromFile } from '../config/build-brand.mjs';
 
-const css = await readFile('dist/css/skoda.css', 'utf8');
-const liferay = JSON.parse(await readFile('dist/liferay/skoda/frontend-token-definition.json', 'utf8'));
+const cssNames = (css) =>
+  [...css.replace(/\/\*[\s\S]*?\*\//g, '').matchAll(/(--[\w-]+)\s*:/g)].map((m) => m[1]);
+const liferayTokens = (json) =>
+  json.frontendTokenCategories.flatMap((c) => c.frontendTokenSets.flatMap((s) => s.frontendTokens));
+const exists = (p) => access(p).then(() => true, () => false);
 
-test('CSS is scoped to :root', () => {
-  assert.match(css, /^:root \{$/m);
-});
+describe('conversion rules (fixture)', () => {
+  let css, liferay;
 
-test('CSS contains the expected variable formats', () => {
+  before(async () => {
+    const out = await mkdtemp(join(tmpdir(), 'tokens-'));
+    const brand = await buildBrand('test/fixtures/Test Brand.tokens.json', { outDir: out, verbosity: 'silent' });
+    assert.equal(brand, 'test-brand');
+    css = await readFile(join(out, 'css/test-brand.css'), 'utf8');
+    liferay = JSON.parse(await readFile(join(out, 'liferay/test-brand/frontend-token-definition.json'), 'utf8'));
+  });
+
+  test('CSS is scoped to :root', () => assert.match(css, /^:root \{$/m));
+
   for (const line of [
-    '--color-primary-500: #1A392F;',
-    '--color-primary-050: #FFFFFF;',
-    '--type-link-color: var(--color-primary-500);',
-    '--border-radius-large: 24px;',
-    '--button-padding-horizontal-small: 16px;',
-    '--type-heading-font-weight: 700;',
-    '--theme: "Skoda";',
-    '--type-base-font-family: "SKODA Next";',
+    '--theme: "Test Brand";', // strings are quoted, Theme is lowercased
+    '--color-primary-050: #FFFFFF;', // leading zero kept
+    '--color-primary-500: #1A392F;', // hex from Figma, uppercased
+    '--color-transparent: rgba(255, 255, 255, 0);', // alpha kept
+    '--type-heading-font-family: "SKODA Next";',
+    '--type-heading-font-weight: 700;', // unitless
+    '--border-radius-large: 24px;', // numbers get px
+    '--type-link-color: var(--color-primary-500);', // aliases become var()
     '--tabs-border-radius: var(--border-radius-large);',
-    '--headernav-nav-dropdown-text: var(--color-primary-500);',
+    '--headernav-nav-dropdown-text: var(--type-link-color);', // spaces removed from group names
   ]) {
-    assert.ok(css.includes(line), `missing: ${line}`);
+    test(`CSS contains ${line}`, () => assert.ok(css.includes(line), `missing: ${line}\n\n${css}`));
   }
-});
 
-test('every production variable is generated', async () => {
-  const names = (s) => new Set([...s.replace(/\/\*[\s\S]*?\*\//g, '').matchAll(/(--[\w-]+)\s*:/g)].map((m) => m[1]));
-  const reference = names(await readFile('reference/skoda.production.css', 'utf8'));
-  const generated = names(css);
-  const missing = [...reference].filter((n) => !generated.has(n));
-  assert.deepEqual(missing, []);
-});
-
-test('Liferay token definition maps every token to its CSS variable', () => {
-  const tokens = liferay.frontendTokenCategories.flatMap((c) => c.frontendTokenSets.flatMap((s) => s.frontendTokens));
-  const cssCount = [...css.matchAll(/^\s*--[\w-]+:/gm)].length;
-  assert.equal(tokens.length, cssCount);
-
-  const primary = tokens.find((t) => t.name === 'colorPrimary500');
-  assert.deepEqual(primary, {
-    name: 'colorPrimary500',
-    label: 'color-primary-500',
-    defaultValue: '#1A392F',
-    type: 'String',
-    editorType: 'ColorPicker',
-    mappings: [{ type: 'cssVariable', value: 'color-primary-500' }],
+  test('Liferay token definition matches the CSS', () => {
+    const tokens = liferayTokens(liferay);
+    assert.deepEqual(tokens.map((t) => `--${t.mappings[0].value}`).sort(), cssNames(css).sort());
+    assert.deepEqual(tokens.find((t) => t.name === 'colorPrimary500'), {
+      name: 'colorPrimary500',
+      label: 'color-primary-500',
+      defaultValue: '#1A392F',
+      type: 'String',
+      editorType: 'ColorPicker',
+      mappings: [{ type: 'cssVariable', value: 'color-primary-500' }],
+    });
+    assert.equal(tokens.find((t) => t.name === 'typeLinkColor').defaultValue, '#1A392F'); // aliases resolved
+    assert.equal(tokens.find((t) => t.name === 'tabsBorderRadius').editorType, 'Length');
   });
-  // Aliases get their resolved value as default
-  assert.equal(tokens.find((t) => t.name === 'typeLinkColor').defaultValue, '#1A392F');
-  assert.equal(tokens.find((t) => t.name === 'buttonBorderRadius').editorType, 'Length');
+
+  test('a broken reference fails the build', async () => {
+    const dir = await mkdtemp(join(tmpdir(), 'tokens-'));
+    const src = join(dir, 'Broken.tokens.json');
+    await writeFile(src, JSON.stringify({ a: { $type: 'color', $value: '{does.not.exist}' } }));
+    await assert.rejects(() => buildBrand(src, { outDir: join(dir, 'out'), verbosity: 'silent' }));
+    assert.equal(await exists(join(dir, 'out')), false);
+  });
 });
 
-test('a broken reference fails the build', async () => {
-  const dir = await mkdtemp(join(tmpdir(), 'sd-'));
-  const src = join(dir, 'Broken.tokens.json');
-  await writeFile(src, JSON.stringify({ a: { $type: 'color', $value: '{does.not.exist}' } }));
-  const sd = new StyleDictionary({
-    source: [src],
-    usesDtcg: true,
-    log: { warnings: 'error', verbosity: 'silent' },
-    platforms: { css: { transforms: ['figma/kebab'], buildPath: join(dir, 'out/'), files: [{ destination: 'x.css', format: 'css/variables' }] } },
-  });
-  registerTransforms(StyleDictionary);
-  await assert.rejects(() => sd.buildAllPlatforms());
-  assert.ok(!(await readdir(dir)).includes('out'));
+describe('built brands (dist/)', async () => {
+  const files = (await readdir('tokens')).filter((f) => f.endsWith('.tokens.json'));
+
+  test('at least one brand is present', () => assert.ok(files.length > 0));
+
+  for (const file of files) {
+    const brand = brandFromFile(file);
+
+    test(`${brand}: CSS and Liferay output contain the same tokens`, async () => {
+      const css = await readFile(`dist/css/${brand}.css`, 'utf8');
+      const liferay = JSON.parse(await readFile(`dist/liferay/${brand}/frontend-token-definition.json`, 'utf8'));
+      assert.match(css, /^:root \{$/m);
+      assert.deepEqual(
+        liferayTokens(liferay).map((t) => `--${t.mappings[0].value}`).sort(),
+        cssNames(css).sort(),
+      );
+    });
+
+    // Guard for developers: a variable that production uses must not silently disappear.
+    const referencePath = `reference/${brand}.production.css`;
+    test(`${brand}: no production variables missing`, { skip: !(await exists(referencePath)) && 'no reference file' }, async () => {
+      const generated = new Set(cssNames(await readFile(`dist/css/${brand}.css`, 'utf8')));
+      const missing = cssNames(await readFile(referencePath, 'utf8')).filter((n) => !generated.has(n));
+      assert.deepEqual(missing, [], `Removed from Figma but used in production: ${missing.join(', ')}`);
+    });
+  }
 });

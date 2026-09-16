@@ -1,0 +1,19 @@
+{
+  "Theme": { "$type": "string", "$value": "Test Brand" },
+  "color": {
+    "primary": {
+      "050": { "$type": "color", "$value": { "colorSpace": "srgb", "components": [1, 1, 1], "alpha": 1, "hex": "#FFFFFF" } },
+      "500": { "$type": "color", "$value": { "colorSpace": "srgb", "components": [0.10196078568696976, 0.2235294133424759, 0.18431372940540314], "alpha": 1, "hex": "#1a392f" } }
+    },
+    "transparent": { "$type": "color", "$value": { "colorSpace": "srgb", "components": [1, 1, 1], "alpha": 0, "hex": "#FFFFFF" } }
+  },
+  "type": {
+    "heading-font-family": { "$type": "string", "$value": "SKODA Next" },
+    "heading-font-weight": { "$type": "number", "$value": 700 },
+    "link-color": { "$type": "color", "$value": "{color.primary.500}" }
+  },
+  "border": { "radius": { "large": { "$type": "number", "$value": 24 } } },
+  "tabs": { "border-radius": { "$type": "number", "$value": "{border.radius.large}" } },
+  "header nav": { "nav": { "dropdown-text": { "$type": "color", "$value": "{type.link-color}" } } },
+  "$extensions": { "com.figma.modeName": "Test Brand" }
+}
